@@ -255,6 +255,26 @@
       margin-top: 4px;
     }
 
+    /* Botão pequeno de som */
+    .btn-sound {
+      margin-top: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,0.15);
+      background: #ffffff;
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: #374151;
+    }
+
+    .btn-sound:active {
+      transform: translateY(1px);
+      background: #f3f4f6;
+    }
+
     /* TELA FINAL */
     .finish-image {
       width: 170px;
@@ -320,6 +340,9 @@
         <div class="balloon-box">
           <div class="balloon-label">No balão de fala está escrito:</div>
           <div id="balloonText"></div>
+          <button type="button" id="btnListen" class="btn-sound">
+            🔊 Ouvir frase
+          </button>
           <div class="balloon-tail"></div>
         </div>
 
@@ -369,7 +392,7 @@
         scene: "cena1-pai-fala.png",
         context: "O papai está falando com você.",
         balloon: "EU SOU O PAPAI.",
-        instruction: "O que VOCÊ responde para o papai?",
+        instruction: "Peça para ele repetir a frase. Depois pergunte: o que VOCÊ responde para o papai?",
         options: [
           { text: "VOCÊ É O PAPAI.", correct: true },
           { text: "EU SOU O PAPAI.", correct: false }
@@ -380,7 +403,7 @@
         scene: "cena2-crianca-fala-pai.png",
         context: "Você está falando com o papai.",
         balloon: "EU SOU O DAVI.",
-        instruction: "Agora imagine que o papai responde. O que ELE fala para você?",
+        instruction: "Depois de repetir, pergunte: o que o papai responde para você?",
         options: [
           { text: "VOCÊ É O DAVI.", correct: true },
           { text: "EU SOU O DAVI.", correct: false }
@@ -391,7 +414,7 @@
         scene: "cena3-crianca-fala-mae.png",
         context: "Você está falando com a mamãe.",
         balloon: "EU SOU O DAVI.",
-        instruction: "Agora imagine que a mamãe responde. O que ELA fala para você?",
+        instruction: "Depois de repetir, pergunte: o que a mamãe responde para você?",
         options: [
           { text: "VOCÊ É O DAVI.", correct: true },
           { text: "EU SOU O DAVI.", correct: false }
@@ -412,6 +435,7 @@
     const btnNext      = document.getElementById("btnNext");
     const btnPlayAgain = document.getElementById("btnPlayAgain");
     const btnBackHome  = document.getElementById("btnBackHome");
+    const btnListen    = document.getElementById("btnListen");
 
     const roundLabel   = document.getElementById("roundLabel");
     const scoreText    = document.getElementById("scoreText");
@@ -424,7 +448,6 @@
     const optionsDiv   = document.getElementById("options");
     const feedbackDiv  = document.getElementById("feedback");
 
-    // Funções de tela
     function showScreen(name) {
       screenStart.classList.remove("active");
       screenGame.classList.remove("active");
@@ -470,12 +493,8 @@
     }
 
     function handleAnswer(option, buttonEl) {
-      const round = rounds[currentIndex];
-
-      // Se já acertou antes, ignora novos cliques
-      if (btnNext.classList.contains("hidden") === false) {
-        return;
-      }
+      // Se já liberou o botão de próxima, ignora novo clique
+      if (!btnNext.classList.contains("hidden")) return;
 
       const allButtons = optionsDiv.querySelectorAll("button");
 
@@ -487,19 +506,17 @@
         allButtons.forEach(b => {
           b.classList.add("disabled");
           b.disabled = true;
-          if (!b.isSameNode(buttonEl) && b.textContent !== option.text) {
-            // marca as outras como neutras
-          }
         });
 
         const correctText = option.text;
         feedbackDiv.innerHTML =
           `<span class="feedback-good">Muito bem! 🌟</span><br>` +
-          `Agora leia em voz alta junto com o papai: <strong>${correctText}</strong>`;
+          `Agora leiam em voz alta juntos: <strong>${correctText}</strong>`;
         btnNext.classList.remove("hidden");
       } else {
         buttonEl.classList.add("wrong");
-        feedbackDiv.textContent = "Quase! Vamos tentar de novo. Pense em quem está falando: EU ou VOCÊ.";
+        feedbackDiv.textContent =
+          "Quase! Pense quem está falando e quem está respondendo: EU ou VOCÊ.";
         feedbackDiv.className = "feedback-try";
       }
     }
@@ -518,6 +535,19 @@
       showScreen("end");
     }
 
+    // Leitura em voz alta da frase do balão
+    function speakText(text) {
+      if (!("speechSynthesis" in window)) {
+        alert("Seu navegador não suporta leitura em voz alta.");
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "pt-BR";
+      utterance.rate = 0.9; // um pouco mais devagar
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+
     // Eventos
     btnStart.addEventListener("click", startGame);
 
@@ -525,9 +555,9 @@
       alert(
         "Sugestão de uso:\n\n" +
         "1) Sente com ele e joguem juntos.\n" +
-        "2) Leia as frases devagar e peça para ele repetir.\n" +
-        "3) Sempre que acertar, comemorem! Se errar, ajude mostrando quem é o EU e quem é o VOCÊ.\n" +
-        "Este jogo não substitui terapia fonoaudiológica, é só um apoio lúdico em família. 😊"
+        "2) Toque em 'Ouvir frase' e peça para ele repetir devagar.\n" +
+        "3) Depois escolham juntos a resposta correta.\n" +
+        "Este jogo não substitui terapia fonoaudiológica; é um apoio lúdico em família. 😊"
       );
     });
 
@@ -537,6 +567,11 @@
 
     btnBackHome.addEventListener("click", () => {
       showScreen("start");
+    });
+
+    btnListen.addEventListener("click", () => {
+      const text = balloonText.textContent.trim();
+      if (text) speakText(text);
     });
   </script>
 </body>
