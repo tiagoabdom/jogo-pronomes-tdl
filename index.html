@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jogo dos Pronomes – EU x VOCÊ</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 480px;
+      background: #020617;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      border: 1px solid #1f2937;
+    }
+
+    header {
+      padding: 14px 16px;
+      background: linear-gradient(135deg, #1d4ed8, #22c55e);
+      color: #f9fafb;
+    }
+
+    header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    header p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    main {
+      padding: 16px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .card {
+      background: #020617;
+      border-radius: 16px;
+      border: 1px solid #111827;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card h2 {
+      font-size: 17px;
+      margin-bottom: 4px;
+    }
+
+    .card p {
+      font-size: 14px;
+      line-height: 1.4;
+      color: #e5e7eb;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #f9fafb;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .btn-secondary {
+      background: #0f172a;
+      border: 1px solid #1f2937;
+      color: #e5e7eb;
+    }
+
+    .btn-full {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .avatar-row {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 2px;
+    }
+
+    .avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      text-align: center;
+      padding: 4px;
+      color: #f9fafb;
+    }
+
+    .avatar-pai {
+      background: radial-gradient(circle at 30% 20%, #93c5fd, #1d4ed8);
+    }
+
+    .avatar-filho {
+      background: radial-gradient(circle at 30% 20%, #facc15, #ea580c);
+    }
+
+    .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #9ca3af;
+    }
+
+    .context {
+      font-size: 13px;
+      color: #cbd5f5;
+    }
+
+    .balloon {
+      position: relative;
+      background: #0f172a;
+      border-radius: 14px;
+      padding: 10px 12px;
+      border: 1px solid #1f2937;
+      margin-top: 4px;
+    }
+
+    .balloon::after {
+      content: "";
+      position: absolute;
+      bottom: -8px;
+      left: 30px;
+      border-width: 8px 8px 0 8px;
+      border-style: solid;
+      border-color: #0f172a transparent transparent transparent;
+    }
+
+    .balloon-text {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .instruction {
+      margin-top: 6px;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+
+    .answers {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .answer-btn {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+      padding: 10px 12px;
+      background: #020617;
+      color: #e5e7eb;
+      text-align: left;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .answer-btn span {
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    .answer-btn.correct {
+      border-color: #22c55e;
+      background: rgba(34, 197, 94, 0.08);
+    }
+
+    .answer-btn.wrong {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.08);
+    }
+
+    .answer-btn:disabled {
+      cursor: default;
+      opacity: 0.9;
+    }
+
+    .feedback {
+      min-height: 22px;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .feedback.ok {
+      color: #4ade80;
+    }
+
+    .feedback.almost {
+      color: #facc15;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 13px;
+    }
+
+    .stars {
+      font-weight: 600;
+    }
+
+    .tip {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+
+    .end-card h2 {
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .end-card p {
+      text-align: center;
+      font-size: 14px;
+    }
+
+    @media (max-width: 480px) {
+      header h1 {
+        font-size: 16px;
+      }
+      .avatar {
+        width: 64px;
+        height: 64px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Jogo dos Pronomes</h1>
+      <p>Treinando EU e VOCÊ de forma divertida, junto com o adulto.</p>
+    </header>
+
+    <main>
+      <!-- Tela de menu inicial -->
+      <section id="menu" class="card">
+        <h2>Mundo dos Pronomes – EU x VOCÊ</h2>
+        <p>
+          Esse mini-jogo ajuda a criança a treinar a troca de lugar entre
+          <strong>EU</strong> e <strong>VOCÊ</strong>. Use sempre junto com um adulto:
+        </p>
+        <ul style="margin-left: 18px; margin-top: 6px; font-size: 13px; color: #9ca3af; list-style: disc;">
+          <li>Peça para a criança repetir a frase em voz alta.</li>
+          <li>Depois, ajude ela a escolher a resposta correta.</li>
+          <li>Reforce sempre o acerto com elogios.</li>
+        </ul>
+        <button id="startBtn" class="btn btn-full" type="button">
+          ▶️ Começar o jogo
+        </button>
+      </section>
+
+      <!-- Tela do jogo em si -->
+      <section id="game" class="hidden">
+        <div class="card" id="gameCard">
+          <div class="label">Mundo dos pronomes • EU x VOCÊ</div>
+
+          <div class="avatar-row">
+            <div class="avatar avatar-pai">
+              PAPAI<br>(fala no balão)
+            </div>
+            <div class="avatar avatar-filho">
+              CRIANÇA<br>(responde)
+            </div>
+          </div>
+
+          <p class="context" id="contextText">
+            <!-- preenchido via JS -->
+          </p>
+
+          <div class="balloon">
+            <p class="balloon-text" id="balloonText"></p>
+            <button id="listenBtn" type="button" class="btn btn-secondary" style="margin-top: 8px; padding-inline: 10px; font-size: 12px;">
+              🔊 Ouvir frase
+            </button>
+          </div>
+
+          <p class="instruction">
+            1️⃣ Leia ou toque para ouvir a frase.<br>
+            2️⃣ Peça para a criança repetir em voz alta.<br>
+            3️⃣ Pergunte: <strong>“E o que VOCÊ fala para ele?”</strong><br>
+            4️⃣ Só então escolha a resposta junto com ela.
+          </p>
+
+          <div class="answers">
+            <button id="answer1" type="button" class="answer-btn">
+              <span>Opção A</span>
+              <strong>Texto da resposta</strong>
+            </button>
+            <button id="answer2" type="button" class="answer-btn">
+              <span>Opção B</span>
+              <strong>Texto da resposta</strong>
+            </button>
+          </div>
+
+          <div id="feedback" class="feedback"></div>
+
+          <div class="status-row">
+            <div class="stars" id="stars">⭐ 0</div>
+            <button id="nextBtn" class="btn btn-secondary" type="button" disabled>
+              Próxima frase ➜
+            </button>
+          </div>
+
+          <p class="tip">
+            Dica: se a criança errar, mostre com calma: “Olha, quem está falando
+            é o papai. A criança responde usando VOCÊ.” Repetição é amiga do TDL.
+          </p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Lista de rodadas do jogo.
+    // Você pode adaptar os nomes "Tiago" e "Davi" como quiser.
+    const rounds = [
+      {
+        context: "O PAPAI está falando com a criança.",
+        balloon: "EU SOU O PAPAI.",
+        correct: "VOCÊ É O PAPAI.",
+        wrong: "EU SOU O PAPAI."
+      },
+      {
+        context: "A CRIANÇA está falando com o papai.",
+        balloon: "EU SOU O DAVI.",
+        correct: "VOCÊ É O DAVI.",
+        wrong: "EU SOU O DAVI."
+      },
+      {
+        context: "O PAPAI está falando com o Davi.",
+        balloon: "EU SOU O TIAGO.",
+        correct: "VOCÊ É O TIAGO.",
+        wrong: "EU SOU O TIAGO."
+      },
+      {
+        context: "A CRIANÇA está falando com a mamãe.",
+        balloon: "EU SOU A CRIANÇA.",
+        correct: "VOCÊ É A CRIANÇA.",
+        wrong: "EU SOU A CRIANÇA."
+      }
+    ];
+
+    let currentIndex = 0;
+    let stars = 0;
+
+    const menuSection = document.getElementById("menu");
+    const gameSection = document.getElementById("game");
+
+    const contextText = document.getElementById("contextText");
+    const balloonText = document.getElementById("balloonText");
+    const listenBtn = document.getElementById("listenBtn");
+    const answer1Btn = document.getElementById("answer1");
+    const answer2Btn = document.getElementById("answer2");
+    const feedbackEl = document.getElementById("feedback");
+    const starsEl = document.getElementById("stars");
+    const nextBtn = document.getElementById("nextBtn");
+    const startBtn = document.getElementById("startBtn");
+
+    function startGame() {
+      currentIndex = 0;
+      stars = 0;
+      starsEl.textContent = "⭐ 0";
+      menuSection.classList.add("hidden");
+      gameSection.classList.remove("hidden");
+      showRound();
+    }
+
+    function showRound() {
+      const round = rounds[currentIndex];
+
+      contextText.textContent = round.context;
+      balloonText.textContent = round.balloon;
+      feedbackEl.textContent = "";
+      feedbackEl.className = "feedback";
+
+      nextBtn.disabled = true;
+
+      // Monta as opções e embaralha
+      const options = [
+        { text: round.correct, isCorrect: true },
+        { text: round.wrong, isCorrect: false }
+      ];
+
+      if (Math.random() < 0.5) {
+        options.reverse();
+      }
+
+      setupAnswerButton(answer1Btn, options[0], "Opção A");
+      setupAnswerButton(answer2Btn, options[1], "Opção B");
+    }
+
+    function setupAnswerButton(button, option, label) {
+      button.disabled = false;
+      button.classList.remove("correct", "wrong");
+      button.dataset.correct = option.isCorrect ? "true" : "false";
+      button.innerHTML = `
+        <span>${label}</span>
+        <strong>${option.text}</strong>
+      `;
+    }
+
+    function handleAnswerClick(event) {
+      const button = event.currentTarget;
+      const isCorrect = button.dataset.correct === "true";
+
+      // Desabilita os botões para não clicar de novo
+      answer1Btn.disabled = true;
+      answer2Btn.disabled = true;
+
+      if (isCorrect) {
+        button.classList.add("correct");
+        stars++;
+        starsEl.textContent = "⭐ " + stars;
+        feedbackEl.textContent = "Muito bem! É assim que a criança responde.";
+        feedbackEl.classList.add("ok");
+      } else {
+        button.classList.add("wrong");
+        feedbackEl.textContent = "Quase! Veja quem está falando no balão e pense de novo em como a CRIANÇA responde.";
+        feedbackEl.classList.add("almost");
+      }
+
+      nextBtn.disabled = false;
+    }
+
+    function nextRound() {
+      currentIndex++;
+      if (currentIndex >= rounds.length) {
+        showEndScreen();
+      } else {
+        showRound();
+      }
+    }
+
+    function showEndScreen() {
+      const gameCard = document.getElementById("gameCard");
+      gameCard.innerHTML = `
+        <div class="end-card">
+          <h2>Parabéns! 🎉</h2>
+          <p>Vocês treinaram o mundo dos pronomes EU x VOCÊ.</p>
+          <p style="margin-top: 6px;">Estrelas conquistadas: <strong>${stars}</strong> ⭐</p>
+          <p style="margin-top: 8px; font-size: 13px; color: #9ca3af;">
+            Dica: repitam o jogo em outros dias. Para TDL, a repetição frequente
+            e leve ajuda muito o cérebro a fixar as formas corretas.
+          </p>
+          <button class="btn btn-full" type="button" onclick="window.location.reload()">
+            🔄 Jogar novamente
+          </button>
+        </div>
+      `;
+    }
+
+    function speak(text) {
+      if (!("speechSynthesis" in window)) {
+        alert("Seu navegador não suporta leitura em voz alta (speechSynthesis).");
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "pt-BR";
+      utterance.rate = 0.95; // um pouco mais devagar
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Eventos
+    startBtn.addEventListener("click", startGame);
+    answer1Btn.addEventListener("click", handleAnswerClick);
+    answer2Btn.addEventListener("click", handleAnswerClick);
+    nextBtn.addEventListener("click", nextRound);
+    listenBtn.addEventListener("click", () => {
+      const text = balloonText.textContent || "";
+      if (text.trim()) {
+        speak(text);
+      }
+    });
+  </script>
+</body>
+</html>
